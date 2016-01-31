@@ -1,0 +1,16 @@
+CACHE MANIFEST
+# version 1.0
+
+CACHE:
+js/jquery-1.10.2.min.js
+js/sha512.js
+bootstrap/js/bootstrap.min.js
+bootstrap/css/bootstrap.min.css
+bootstrap/css/bootstrap-theme.min.css
+bootstrap/fonts/glyphicons-halflings-regular.woff
+bootstrap/fonts/glyphicons-halflings-regular.ttf
+bootstrap/fonts/glyphicons-halflings-regular.svg
+bootstrap/fonts/glyphicons-halflings-regular.eot
+
+NETWORK:
+*
