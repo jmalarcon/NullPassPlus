@@ -171,7 +171,7 @@
 
       $(document).ready(function() {
         $('.frm-input').keyup(updatePassword).mouseup(updatePassword);
-        $('#reveal').mousedown(revealPassword).mouseup(hidePassword);
+        $('#reveal').on('mousedown touchstart', revealPassword).on('mouseup touchend', hidePassword);
         $('#password').on('focus', function(){
           revealPassword();
           this.select();
