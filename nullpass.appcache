@@ -1,8 +1,8 @@
 CACHE MANIFEST
-# version 1.0.2
+# version 1.1.0
 
 CACHE:
-js/jquery-1.10.2.min.js
+js/jquery-1.12.4.min.js
 js/sha512.js
 bootstrap/js/bootstrap.min.js
 bootstrap/css/bootstrap.min.css

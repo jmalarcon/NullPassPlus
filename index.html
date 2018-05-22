@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="NullPass+ provides you with a unique password for every service you use without the cumbersome task of managing a password file!">
-    <meta name="author" content="Adam MacLeod">
+    <meta name="author" content="Adam MacLeod &amp; JM Alarcón">
     <link rel="apple-touch-icon" sizes="57x57" href="favicons/apple-touch-icon-57x57.png">
 	<link rel="apple-touch-icon" sizes="60x60" href="favicons/apple-touch-icon-60x60.png">
 	<link rel="apple-touch-icon" sizes="72x72" href="favicons/apple-touch-icon-72x72.png">
@@ -54,10 +54,15 @@
         <div class="col-xs-12 col-sm-4 col-sm-push-8">
           <h1>&#8709;Pass+</h1>
           <form role="form">
-            <input type="text"     id="domain"   class="form-control frm-input" placeholder="Resource name" required autofocus autocomplete="off">
-            <input type="password" id="master"   class="form-control frm-input" placeholder="Master Password" required>
+            <input type="text"     id="resource"   class="form-control frm-input" placeholder="Resource name" required autofocus autocomplete="off">
+            <input type="password" id="master"   class="form-control frm-input" placeholder="Master password" required>
             <input type="number"   id="length"   class="form-control frm-input" value="12" required autocomplete="off">
-            <input type="text"     id="password" class="form-control well well-sm" readonly>
+            <div class="input-group">
+              <input type="text"     id="password" class="form-control well well-sm" placeholder="Resulting password" readonly>
+              <div id="reveal" class="input-group-addon">
+                <span class="glyphicon glyphicon-eye-open"></span>
+              </div>
+            </div>
           </form>  
         </div><!-- /column -->
 
@@ -66,7 +71,7 @@
             <h1>What is &#8709;Pass+?</h1>
             <h2>Easy</h2>
             <p>
-              NullPass+ is a password manager that doesn't require you to manage a password file. This is accomplished by combining a <strong>single master password</strong> with a site specific token (often the domain name or the account or resource name that you want to get a passwod for) to generate a unique password. This password is cryptographically secure and your original password is unrecoverable should an attacker manage to obtain your unique site password. This means an attack on one of the sites you visit will not disclose your password to any other services - keeping your accounts safe.
+              NullPass+ is a password manager that doesn't require you to manage a password file. This is accomplished by combining a <strong>single master password</strong> with a site specific token (often the resource name or the account or resource name that you want to get a passwod for) to generate a unique password. This password is cryptographically secure and your original password is unrecoverable should an attacker manage to obtain your unique site password. This means an attack on one of the sites you visit will not disclose your password to any other services - keeping your accounts safe.
             </p>
 
             <h2>Secure</h2>
@@ -81,7 +86,7 @@
 
             <h2>Open</h2>
             <p>
-              If you are interested, NullPass+ works by calculating <code>SHA-512("length" + "your password" + "domain")</code>, truncating the result to <em>length</em> and adding a symbol in the middle to allow for complexity requirements. You can see this in effect by viewing the source of this webpage, or you can view/fork the project on <a href="https://github.com/jmalarcon/NullPassPlus">GitHub</a>!
+              If you are interested, NullPass+ works by calculating <code>SHA-512("length" + "your password" + "resource")</code>, truncating the result to <em>length</em> and adding a symbol in the middle to allow for complexity requirements. You can see this in effect by viewing the source of this webpage, or you can view/fork the project on <a href="https://github.com/jmalarcon/NullPassPlus">GitHub</a>!
             </p>
             <p>
               NullPass+ stands on the shoulders of giants. The following projects were instrumental to the creation of NullPass+:
@@ -103,11 +108,14 @@
       </div><!-- /row -->
     </div> <!-- /container -->
 
-    <script src="js/jquery-1.10.2.min.js"></script>
+    <script src="js/jquery-1.12.4.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/sha512.js"></script>
     
     <script>
+
+      var pwd = '';
+
       //Gets a symbol to add to the password using a simple mapping for characters
       function getSymbolFromChar(char){
         var symbols = "@#$%&[]{}_!()*";
@@ -116,8 +124,8 @@
         return symbols.substring(sym,sym+1);
       }
       
-      function generatePassword(master, domain, length) {            
-        var pass = length + master + domain.trim().toLowerCase();
+      function generatePassword(master, resource, length) {            
+        var pass = length + master + resource.trim().toLowerCase();
         var shaObj = new jsSHA(pass, "TEXT");
         var hash = shaObj.getHash("SHA-512", "B64");
         hash = hash.substring(0,length);
@@ -127,9 +135,15 @@
         return hash.substring(0,midPass) + sym + hash.substring(midPass+1); //Hash with changed symbol in the middle
       }
 
+      function maskedPassword(){
+        return Array(pwd.length+1).join('•');
+      }
+
       function updatePassword(){
         var master = $('#master')[0].value;
-        var domain = $('#domain')[0].value;
+        var resource = $('#resource')[0].value;
+        if (master == '' || resource == '')
+          return;
         var length = Math.floor($('#length').val());
         //Check length. Less than 6 or more than 88 is not allowed (the hash is 88 in length and less than 6 is nonsense)
         if (isNaN(length) || length < 6){
@@ -141,14 +155,28 @@
             $('#length').val('88');
         }
 
-        $('#password').val(generatePassword(master, domain, length));
+        pwd = generatePassword(master, resource, length);
+        $('#password').val(maskedPassword());
+      }
+
+      function revealPassword() {
+        if (pwd != '')
+          $('#password').val(pwd);
+      }
+
+      function hidePassword() {
+        if (pwd != '')
+        $('#password').val(maskedPassword());
       }
 
       $(document).ready(function() {
         $('.frm-input').keyup(updatePassword).mouseup(updatePassword);
+        $('#reveal').mousedown(revealPassword).mouseup(hidePassword);
         $('#password').on('focus', function(){
+          revealPassword();
           this.select();
           document.execCommand('copy');
+          hidePassword();
           $(this).tooltip({
               trigger: 'manual',
               delay: {show: 0, hide: 1500},
